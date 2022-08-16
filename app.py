@@ -171,7 +171,7 @@ def recommend_by_customer_order(in_customer_id) :
 def index(): 
     return {'message': 'This API for recommend food for customer by order history'}
 
-@app.post("/recommend_by_cust_order") # Service API
+@app.post("/recommend-by-cust-order") # Service API
 def predict(data : request_body):
     pred = recommend_by_customer_order(data.customer_id)
     return {f'{pred}'}
