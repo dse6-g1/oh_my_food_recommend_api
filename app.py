@@ -13,7 +13,7 @@ app = FastAPI()
 class request_body(BaseModel): # Declare Input
     customer_id: str
 
-def findDoc(query, mongokey, collection, database, datasource, dataendpoint) :
+def findDoc(mongokey, collection, database, datasource, dataendpoint, query) :
   url = "https://data.mongodb-api.com/app/%s/endpoint/data/v1/action/findOne"%dataendpoint
   payload = json.dumps({
       "collection" : collection,
@@ -86,6 +86,17 @@ def findOrderByCustomerId(temp_customer_id) :
       'customer_id' : temp_customer_id
   }
   return findMany(mongokey, collection, database, datasource, dataendpoint, sort, query)
+
+def findFoodNameById(temp_food_id) :
+  mongokey = 'KPFD6nHURX1vkF7fugJsBhUSkEawEY0ntdoXPmglbiq35IZ3OQwnaXSU22A8mcPK'
+  database = 'dse6g1customer'
+  collection = 'foods'
+  datasource = 'Cluster0'
+  dataendpoint = 'data-quohf'
+  query = {
+      'food_id' : temp_food_id
+  }
+  return findDoc(mongokey, collection, database, datasource, dataendpoint, query)
 
 def recommend_by_customer_order(in_customer_id) :
   personal_order_doc = findOrderByCustomerId(in_customer_id)
@@ -165,7 +176,11 @@ def recommend_by_customer_order(in_customer_id) :
         maxScore = data_ibs._get_value(temp_food_id,temp_food_for_score)
         resultFoodId = temp_food_for_score
 
-  return resultFoodId
+  foodDoc = findFoodNameById(resultFoodId)
+  #print(foodDoc)
+  resultFoodName = foodDoc.get("document").get("food_name")
+
+  return resultFoodName
 
 @app.get('/') # index of API
 def index(): 
