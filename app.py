@@ -106,11 +106,11 @@ def recommend_by_customer_order(in_customer_id) :
   for doc in personal_order_doc.get("documents") :
     temp_cart_list = doc.get("cart")
     for temp_doc_cart in temp_cart_list :
-      temp_food_id = temp_cart_list.get("food_id")
+      temp_food_id = temp_doc_cart.get("food_id")
       if None == personalFoodFreq.get(temp_food_id) :
-        personalFoodFreq[temp_food_id] = temp_cart_list.get("amount")
+        personalFoodFreq[temp_food_id] = temp_doc_cart.get("amount")
       else :
-        personalFoodFreq[temp_food_id] = personalFoodFreq.get(temp_food_id) + temp_cart_list.get("amount")
+        personalFoodFreq[temp_food_id] = personalFoodFreq.get(temp_food_id) + temp_doc_cart.get("amount")
 
   maxFreq = 0
   for temp_food_id in personalFoodFreq.keys() :
@@ -135,9 +135,7 @@ def recommend_by_customer_order(in_customer_id) :
 
     temp_cart_list = doc.get("cart")
     for temp_doc_cart in temp_cart_list :
-
       temp_food_id = temp_doc_cart.get("food_id")
-
       if None == temp_orderDoc.get(temp_food_id) :
         temp_orderDoc[temp_food_id] = temp_doc_cart.get("amount")
       else :
