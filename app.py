@@ -48,7 +48,7 @@ def findAll(mongokey, collection, database, datasource, dataendpoint, sort) :
 def findAllCustOrder() :
   mongokey = 'KPFD6nHURX1vkF7fugJsBhUSkEawEY0ntdoXPmglbiq35IZ3OQwnaXSU22A8mcPK'
   database = 'dse6g1customer'
-  collection = 'customerorder'
+  collection = 'orders'
   datasource = 'Cluster0'
   dataendpoint = 'data-quohf'
   sort = {
@@ -76,7 +76,7 @@ def findMany(mongokey, collection, database, datasource, dataendpoint, sort, que
 def findOrderByCustomerId(temp_customer_id) :
   mongokey = 'KPFD6nHURX1vkF7fugJsBhUSkEawEY0ntdoXPmglbiq35IZ3OQwnaXSU22A8mcPK'
   database = 'dse6g1customer'
-  collection = 'customerorder'
+  collection = 'orders'
   datasource = 'Cluster0'
   dataendpoint = 'data-quohf'
   sort = {
@@ -101,13 +101,16 @@ def findFoodNameById(temp_food_id) :
 def recommend_by_customer_order(in_customer_id) :
   personal_order_doc = findOrderByCustomerId(in_customer_id)
   personalFoodFreq = {}
+  temp_cart_list = []
 
   for doc in personal_order_doc.get("documents") :
-    temp_food_id = doc.get("food_id")
-    if None == personalFoodFreq.get(temp_food_id) :
-      personalFoodFreq[temp_food_id] = doc.get("quantity")
-    else :
-      personalFoodFreq[temp_food_id] = personalFoodFreq.get(temp_food_id) + doc.get("quantity")
+    temp_cart_list = doc.get("cart")
+    for temp_doc_cart in temp_cart_list :
+      temp_food_id = temp_cart_list.get("food_id")
+      if None == personalFoodFreq.get(temp_food_id) :
+        personalFoodFreq[temp_food_id] = temp_cart_list.get("amount")
+      else :
+        personalFoodFreq[temp_food_id] = personalFoodFreq.get(temp_food_id) + temp_cart_list.get("amount")
 
   maxFreq = 0
   for temp_food_id in personalFoodFreq.keys() :
@@ -129,14 +132,18 @@ def recommend_by_customer_order(in_customer_id) :
         orderbyuserDoc[temp_currentCust] = temp_orderDoc
         temp_orderDoc = {}
       temp_currentCust = doc.get("customer_id")
-    temp_food_id = doc.get("food_id")
 
-    if None == temp_orderDoc.get(temp_food_id) :
-      temp_orderDoc[temp_food_id] = doc.get("quantity")
-    else :
-      temp_orderDoc[temp_food_id] = temp_orderDoc.get(temp_food_id) + doc.get("quantity")
-    if temp_food_id not in allFoodList :
-      allFoodList.append(temp_food_id)
+    temp_cart_list = doc.get("cart")
+    for temp_doc_cart in temp_cart_list :
+
+      temp_food_id = temp_doc_cart.get("food_id")
+
+      if None == temp_orderDoc.get(temp_food_id) :
+        temp_orderDoc[temp_food_id] = temp_doc_cart.get("amount")
+      else :
+        temp_orderDoc[temp_food_id] = temp_orderDoc.get(temp_food_id) + temp_doc_cart.get("amount")
+      if temp_food_id not in allFoodList :
+        allFoodList.append(temp_food_id)
 
   if len(temp_orderDoc) != 0 :
     orderbyuserDoc[temp_currentCust] = temp_orderDoc
