@@ -207,7 +207,7 @@ def recommend_by_customer_order(in_customer_id) :
   #print(foodDoc)
   #resultFoodName = foodDoc.get("document").get("food_name")
 
-  return foodDoc
+  return foodDoc.get("document")
 
 @app.get('/') # index of API
 def index(): 
