@@ -98,6 +98,15 @@ def findFoodNameById(temp_food_id) :
   }
   return findDoc(mongokey, collection, database, datasource, dataendpoint, query)
 
+def selectFoodMaxPurchase(v_foodOrderCountDoc) :
+  maxPurchase = 0;
+  tmp_resultFoodId = "#None#"
+  for temp_food_id in v_foodOrderCountDoc.keys() :
+    if maxPurchase < v_foodOrderCountDoc.get(temp_food_id) :
+      maxPurchase = v_foodOrderCountDoc.get(temp_food_id)
+      tmp_resultFoodId = temp_food_id
+  return tmp_resultFoodId
+
 def recommend_by_customer_order(in_customer_id) :
   personal_order_doc = findOrderByCustomerId(in_customer_id)
   personalFoodFreq = {}
@@ -124,6 +133,7 @@ def recommend_by_customer_order(in_customer_id) :
   temp_currentCust = "#startcustid#"
   orderbyuserDoc = {}
   temp_orderDoc = {}
+  foodOrderCountDoc = {}
   allFoodList = []
   foodNotPurchaseList = []
   for doc in custorder_doc.get("documents") :
@@ -140,6 +150,12 @@ def recommend_by_customer_order(in_customer_id) :
         temp_orderDoc[temp_food_id] = temp_doc_cart.get("amount")
       else :
         temp_orderDoc[temp_food_id] = temp_orderDoc.get(temp_food_id) + temp_doc_cart.get("amount")
+
+      if None == foodOrderCountDoc.get(temp_food_id) :
+        foodOrderCountDoc[temp_food_id] = temp_doc_cart.get("amount")
+      else :
+        foodOrderCountDoc[temp_food_id] = foodOrderCountDoc.get(temp_food_id) + temp_doc_cart.get("amount")
+
       if temp_food_id not in allFoodList :
         allFoodList.append(temp_food_id)
 
@@ -153,6 +169,7 @@ def recommend_by_customer_order(in_customer_id) :
   #print(orderbyuserDoc)
   #print(allFoodList)
   #print(foodNotPurchaseList)
+  #print(foodOrderCountDoc)
 
   df_custXfood = pd.DataFrame(index=orderbyuserDoc.keys(),columns=allFoodList)
   temp_row = 0
@@ -181,11 +198,16 @@ def recommend_by_customer_order(in_customer_id) :
         maxScore = data_ibs._get_value(temp_food_id,temp_food_for_score)
         resultFoodId = temp_food_for_score
 
+  if resultFoodId == "#None#" :
+    resultFoodId = selectFoodMaxPurchase(foodOrderCountDoc)
+
+  #print(resultFoodId)
+
   foodDoc = findFoodNameById(resultFoodId)
   #print(foodDoc)
-  resultFoodName = foodDoc.get("document").get("food_name")
+  #resultFoodName = foodDoc.get("document").get("food_name")
 
-  return resultFoodName
+  return foodDoc
 
 @app.get('/') # index of API
 def index(): 
