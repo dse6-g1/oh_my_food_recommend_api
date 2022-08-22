@@ -216,7 +216,7 @@ def index():
 @app.post("/recommend-by-cust-order") # Service API
 def predict(data : request_body):
     pred = recommend_by_customer_order(data.customer_id)
-    return {f'{pred}'}
+    return pred
 
 if __name__ == '__main__':
     uvicorn.run(app, host='127.0.0.1', port=8000)
